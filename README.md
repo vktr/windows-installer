@@ -63,3 +63,8 @@ can be obtained by running `openView` on a `Database` instance.
 | `MsiViewFetch`                 | `view.fetch()`                       |
 | `MsiViewGetError`              | `view.getError()`                    |
 | `MsiViewModify`                | `view.modify(<Mode>, <Record>)`      |
+
+
+## License
+
+Code licensed under the [MIT License](LICENSE.txt).
