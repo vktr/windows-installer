@@ -35,8 +35,7 @@ napi_status Record::Init(napi_env env, napi_value exports)
     napi_value cons;
     napi_define_class(env, "Record", NAPI_AUTO_LENGTH, New, nullptr, ARRAYSIZE(properties), properties, &cons);
     napi_create_reference(env, cons, 1, &constructor);
-
-    // MAYBE??napi_set_named_property(env, exports, "Record", cons);
+    napi_set_named_property(env, exports, "Record", cons);
 
     return napi_ok;
 }
@@ -48,11 +47,36 @@ napi_value Record::New(napi_env env, napi_callback_info callback_info)
     napi_value _this;
     napi_get_cb_info(env, callback_info, &argc, args, &_this, nullptr);
 
-    MSIHANDLE* ph;
-    napi_get_value_external(env, args[0], reinterpret_cast<void**>(&ph));
+    napi_valuetype type;
+    napi_typeof(env, args[0], &type);
 
-    Record* rec = new Record(env, *ph);
-    napi_wrap(env, _this, rec, Record::Destructor, nullptr, &rec->wrapper_);
+    switch (type)
+    {
+    case napi_external:
+    {
+        MSIHANDLE* ph;
+        napi_get_value_external(env, args[0], reinterpret_cast<void**>(&ph));
+
+        Record* rec = new Record(env, *ph);
+        napi_wrap(env, _this, rec, Record::Destructor, nullptr, &rec->wrapper_);
+
+        break;
+    }
+    case napi_number:
+    {
+        int32_t num;
+        napi_get_value_int32(env, args[0], &num);
+
+        MSIHANDLE ph = MsiCreateRecord(static_cast<UINT>(num));
+        Record* rec = new Record(env, ph);
+        napi_wrap(env, _this, rec, Record::Destructor, nullptr, &rec->wrapper_);
+
+        break;
+    }
+    default:
+        napi_throw_type_error(env, nullptr, "Wrong argument type");
+        return nullptr;
+    }
 
     return _this;
 }

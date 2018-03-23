@@ -1,7 +1,5 @@
 const wi = require('../');
 
-console.log(wi.MSIDBOPEN_READONLY);
-
 const db = new wi.Database(process.argv[2], wi.MSIDBOPEN_READONLY);
 const view = db.openView(process.argv[3]);
 

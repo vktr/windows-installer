@@ -65,6 +65,17 @@ can be obtained by running `openView` on a `Database` instance.
 | `MsiViewModify`                | `view.modify(<Mode>, <Record>)`      |
 
 
+### Record functions
+
+Record functions requires a `Record` (named `rec` in the examples below). This
+can be obtained by running `fetch` on a `View` instance or by running
+`new Record(<NumFields>)`.
+
+| Win32 Function                 | Node.js function                     |
+| ------------------------------ | ------------------------------------ |
+| `MsiCreateRecord`              | `new Record(<NumFields>)`            |
+
+
 ## License
 
 Code licensed under the [MIT License](LICENSE.txt).
