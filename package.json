@@ -1,0 +1,27 @@
+{
+  "name": "windows-installer",
+  "version": "0.0.1",
+  "description": "Node.js bindings for the Windows Installer API.",
+  "main": "build/Release/windows_installer.node",
+  "scripts": {
+    "build": "node-gyp build",
+    "clean": "node-gyp clean",
+    "configure": "node-gyp configure"
+  },
+  "repository": "https://github.com/vktr/windows-installer.git",
+  "keywords": [
+    "wix",
+    "windows-installer",
+    "msi",
+    "windows"
+  ],
+  "author": "Viktor Elofsson <viktor@viktorelofsson.se>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vktr/windows-installer/issues"
+  },
+  "homepage": "https://github.com/vktr/windows-installer#readme",
+  "dependencies": {
+    "node-gyp": "^3.6.2"
+  }
+}

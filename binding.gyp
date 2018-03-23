@@ -1,0 +1,19 @@
+{
+    "targets":
+    [
+        {
+            "target_name": "windows_installer",
+            "sources":
+            [
+                "./src/database.cc",
+                "./src/record.cc",
+                "./src/view.cc",
+                "./src/windows-installer.cc"
+            ],
+            "libraries":
+            [
+                "msi"
+            ]
+        }
+    ]
+}
