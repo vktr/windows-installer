@@ -35,6 +35,7 @@ napi_status Database::Init(napi_env env, napi_value exports)
         { "generateTransform", nullptr, GenerateTransform, nullptr, nullptr, 0, napi_default, 0 },
         { "getPrimaryKeys", nullptr, GetPrimaryKeys, nullptr, nullptr, 0, napi_default, 0 },
         { "getState", nullptr, GetState, nullptr, nullptr, 0, napi_default, 0 },
+        { "import", nullptr, Import, nullptr, nullptr, 0, napi_default, 0 },
         { "isTablePersistent", nullptr, IsTablePersistent, nullptr, nullptr, 0, napi_default, 0 },
         { "openView", nullptr, OpenView, nullptr, nullptr, 0, napi_default, 0 },
     };
@@ -322,6 +323,49 @@ napi_value Database::GenerateTransform(napi_env env, napi_callback_info callback
     case ERROR_INVALID_PARAMETER:
         napi_throw_type_error(env, nullptr, "An invalid parameter was passed to the function.");
         return nullptr;
+    }
+
+    return nullptr;
+}
+
+napi_value Database::Import(napi_env env, napi_callback_info callback_info)
+{
+    size_t argc = 2;
+    napi_value args[2];
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, &argc, args, &_this, nullptr);
+
+    Database* db;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&db));
+
+    std::string folder_path;
+    wi_napi_to_std_string(env, args[0], &folder_path);
+
+    std::string file_name;
+    wi_napi_to_std_string(env, args[0], &file_name);
+
+    UINT res = MsiDatabaseImport(
+        db->handle_,
+        folder_path.c_str(),
+        file_name.c_str());
+
+    switch (res)
+    {
+    case ERROR_BAD_PATHNAME:
+        napi_throw_type_error(env, nullptr, "An invalid path was passed to the function.");
+        break;
+
+    case ERROR_FUNCTION_FAILED:
+        napi_throw_type_error(env, nullptr, "The function failed.");
+        break;
+
+    case ERROR_INVALID_HANDLE:
+        napi_throw_type_error(env, nullptr, "An invalid or inactive handle was supplied.");
+        break;
+
+    case ERROR_INVALID_PARAMETER:
+        napi_throw_type_error(env, nullptr, "An invalid parameter was passed to the function.");
+        break;
     }
 
     return nullptr;
