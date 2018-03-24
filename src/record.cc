@@ -34,6 +34,7 @@ napi_status Record::Init(napi_env env, napi_value exports)
         { "getInteger", nullptr, GetInteger, nullptr, nullptr, 0, napi_default, 0 },
         { "getString", nullptr, GetString, nullptr, nullptr, 0, napi_default, 0 },
         { "isNull", nullptr, IsNull, nullptr, nullptr, 0, napi_default, 0 },
+        { "readStream", nullptr, ReadStream, nullptr, nullptr, 0, napi_default, 0 },
     };
 
     napi_value cons;
@@ -219,3 +220,31 @@ napi_value Record::IsNull(napi_env env, napi_callback_info callback_info)
     return result;
 }
 
+napi_value Record::ReadStream(napi_env env, napi_callback_info callback_info)
+{
+    size_t argc = 1;
+    napi_value args[1];
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, &argc, args, &_this, nullptr);
+
+    Record* rec;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&rec));
+
+    int32_t field;
+    napi_get_value_int32(env, args[0], &field);
+
+    // Get the amount of bytes in the stream
+    DWORD pcbDataBuf = 0;
+    MsiRecordReadStream(rec->handle_, static_cast<UINT>(field), 0, &pcbDataBuf);
+
+    char* data;
+    napi_value arraybuffer;
+    napi_create_arraybuffer(env, static_cast<size_t>(pcbDataBuf), reinterpret_cast<void**>(&data), &arraybuffer);
+
+    MsiRecordReadStream(rec->handle_, static_cast<UINT>(field), data, &pcbDataBuf);
+
+    napi_value typedarray;
+    napi_create_typedarray(env, napi_uint8_array, static_cast<size_t>(pcbDataBuf), arraybuffer, 0, &typedarray);
+
+    return typedarray;
+}
