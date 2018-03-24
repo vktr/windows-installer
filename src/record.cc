@@ -28,6 +28,7 @@ napi_status Record::Init(napi_env env, napi_value exports)
 {
     napi_property_descriptor properties[] =
     {
+        { "clearData", nullptr, ClearData, nullptr, nullptr, 0, napi_default, 0 },
         { "getFieldCount", nullptr, GetFieldCount, nullptr, nullptr, 0, napi_default, 0 },
         { "getString", nullptr, GetString, nullptr, nullptr, 0, napi_default, 0 }
     };
@@ -79,6 +80,26 @@ napi_value Record::New(napi_env env, napi_callback_info callback_info)
     }
 
     return _this;
+}
+
+napi_value Record::ClearData(napi_env env, napi_callback_info callback_info)
+{
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, nullptr, 0, &_this, nullptr);
+
+    Record* rec;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&rec));
+
+    unsigned int res = MsiRecordClearData(rec->handle_);
+
+    switch (res)
+    {
+    case ERROR_INVALID_HANDLE:
+        napi_throw_type_error(env, nullptr, "The handle is inactive or does not represent a record.");
+        break;
+    }
+
+    return nullptr;
 }
 
 napi_value Record::GetFieldCount(napi_env env, napi_callback_info callback_info)
