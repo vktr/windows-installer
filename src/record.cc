@@ -29,6 +29,7 @@ napi_status Record::Init(napi_env env, napi_value exports)
     napi_property_descriptor properties[] =
     {
         { "clearData", nullptr, ClearData, nullptr, nullptr, 0, napi_default, 0 },
+        { "dataSize", nullptr, DataSize, nullptr, nullptr, 0, napi_default, 0 },
         { "getFieldCount", nullptr, GetFieldCount, nullptr, nullptr, 0, napi_default, 0 },
         { "getString", nullptr, GetString, nullptr, nullptr, 0, napi_default, 0 }
     };
@@ -100,6 +101,27 @@ napi_value Record::ClearData(napi_env env, napi_callback_info callback_info)
     }
 
     return nullptr;
+}
+
+napi_value Record::DataSize(napi_env env, napi_callback_info callback_info)
+{
+    size_t argc = 1;
+    napi_value args[1];
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, &argc, args, &_this, nullptr);
+
+    Record* rec;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&rec));
+
+    int32_t field;
+    napi_get_value_int32(env, args[0], &field);
+
+    unsigned int res = MsiRecordDataSize(rec->handle_, static_cast<UINT>(field));
+
+    napi_value result;
+    napi_create_uint32(env, res, &result);
+
+    return result;
 }
 
 napi_value Record::GetFieldCount(napi_env env, napi_callback_info callback_info)
