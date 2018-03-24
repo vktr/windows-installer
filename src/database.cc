@@ -31,6 +31,7 @@ napi_status Database::Init(napi_env env, napi_value exports)
     {
         { "applyTransform", nullptr, ApplyTransform, nullptr, nullptr, 0, napi_default, 0 },
         { "commit", nullptr, Commit, nullptr, nullptr, 0, napi_default, 0 },
+        { "export", nullptr, Export, nullptr, nullptr, 0, napi_default, 0 },
         { "getPrimaryKeys", nullptr, GetPrimaryKeys, nullptr, nullptr, 0, napi_default, 0 },
         { "isTablePersistent", nullptr, IsTablePersistent, nullptr, nullptr, 0, napi_default, 0 },
         { "openView", nullptr, OpenView, nullptr, nullptr, 0, napi_default, 0 },
@@ -183,6 +184,53 @@ napi_value Database::Commit(napi_env env, napi_callback_info callback_info)
 
     case ERROR_INVALID_HANDLE_STATE:
         napi_throw_type_error(env, nullptr, "The handle is in an invalid state.");
+        break;
+    }
+
+    return nullptr;
+}
+
+napi_value Database::Export(napi_env env, napi_callback_info callback_info)
+{
+    size_t argc = 3;
+    napi_value args[3];
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, &argc, args, &_this, nullptr);
+
+    Database* db;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&db));
+
+    std::string table_name;
+    wi_napi_to_std_string(env, args[0], &table_name);
+
+    std::string folder_path;
+    wi_napi_to_std_string(env, args[1], &folder_path);
+
+    std::string file_name;
+    wi_napi_to_std_string(env, args[2], &file_name);
+
+    UINT res = MsiDatabaseExport(
+        db->handle_,
+        table_name.c_str(),
+        folder_path.c_str(),
+        file_name.c_str());
+
+    switch (res)
+    {
+    case ERROR_BAD_PATHNAME:
+        napi_throw_type_error(env, nullptr, "An invalid path is passed to the function.");
+        break;
+
+    case ERROR_FUNCTION_FAILED:
+        napi_throw_type_error(env, nullptr, "The function fails.");
+        break;
+
+    case ERROR_INVALID_HANDLE:
+        napi_throw_type_error(env, nullptr, "An invalid or inactive handle is supplied.");
+        break;
+
+    case ERROR_INVALID_PARAMETER:
+        napi_throw_type_error(env, nullptr, "An invalid parameter is passed to the function.");
         break;
     }
 
