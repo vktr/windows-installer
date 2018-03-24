@@ -480,6 +480,49 @@ napi_value Database::GetState(napi_env env, napi_callback_info callback_info)
     return result;
 }
 
+napi_value Database::Merge(napi_env env, napi_callback_info callback_info)
+{
+    size_t argc = 2;
+    napi_value args[2];
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, &argc, args, &_this, nullptr);
+
+    Database* db;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&db));
+
+    Database* db_merge;
+    napi_unwrap(env, args[0], reinterpret_cast<void**>(&db));
+
+    std::string table_name;
+    wi_napi_to_std_string(env, args[1], &table_name);
+
+    UINT res = MsiDatabaseMerge(
+        db->handle_,
+        db_merge->handle_,
+        table_name.c_str());
+
+    switch (res)
+    {
+    case ERROR_FUNCTION_FAILED:
+        napi_throw_type_error(env, nullptr, "Row merge conflicts were reported.");
+        break;
+
+    case ERROR_INVALID_HANDLE:
+        napi_throw_type_error(env, nullptr, "An invalid or inactive handle was supplied.");
+        break;
+
+    case ERROR_INVALID_TABLE:
+        napi_throw_type_error(env, nullptr, "An invalid table was supplied.");
+        break;
+
+    case ERROR_DATATYPE_MISMATCH:
+        napi_throw_type_error(env, nullptr, "Schema difference between the two databases.");
+        break;
+    }
+
+    return nullptr;
+}
+
 napi_value Database::OpenView(napi_env env, napi_callback_info callback_info)
 {
     size_t argc = 1;
