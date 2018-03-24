@@ -35,6 +35,7 @@ napi_status Record::Init(napi_env env, napi_value exports)
         { "getString", nullptr, GetString, nullptr, nullptr, 0, napi_default, 0 },
         { "isNull", nullptr, IsNull, nullptr, nullptr, 0, napi_default, 0 },
         { "readStream", nullptr, ReadStream, nullptr, nullptr, 0, napi_default, 0 },
+        { "setInteger", nullptr, SetInteger, nullptr, nullptr, 0, napi_default, 0 },
     };
 
     napi_value cons;
@@ -247,4 +248,40 @@ napi_value Record::ReadStream(napi_env env, napi_callback_info callback_info)
     napi_create_typedarray(env, napi_uint8_array, static_cast<size_t>(pcbDataBuf), arraybuffer, 0, &typedarray);
 
     return typedarray;
+}
+
+napi_value Record::SetInteger(napi_env env, napi_callback_info callback_info)
+{
+    size_t argc = 2;
+    napi_value args[2];
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, &argc, args, &_this, nullptr);
+
+    Record* rec;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&rec));
+
+    int32_t field;
+    napi_get_value_int32(env, args[0], &field);
+
+    int32_t value;
+    napi_get_value_int32(env, args[1], &value);
+
+    BOOL res = MsiRecordSetInteger(rec->handle_, static_cast<UINT>(field), value);
+
+    switch (res)
+    {
+    case ERROR_INVALID_FIELD:
+        napi_throw_type_error(env, nullptr, "An invalid field of the record was supplied.");
+        break;
+
+    case ERROR_INVALID_HANDLE:
+        napi_throw_type_error(env, nullptr, "An invalid or inactive handle was supplied.");
+        break;
+
+    case ERROR_INVALID_PARAMETER:
+        napi_throw_type_error(env, nullptr, "An invalid parameter was passed to the function.");
+        break;
+    }
+
+    return nullptr;
 }
