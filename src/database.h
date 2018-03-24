@@ -21,9 +21,15 @@ namespace wi
         static void Destructor(napi_env env, void* native_obj, void* finalize_hint);
 
         // Class functions
+        static napi_value ApplyTransform(napi_env env, napi_callback_info callback_info);
         static napi_value Commit(napi_env env, napi_callback_info callback_info);
+        static napi_value Export(napi_env env, napi_callback_info callback_info);
+        static napi_value GenerateTransform(napi_env env, napi_callback_info callback_info);
         static napi_value GetPrimaryKeys(napi_env env, napi_callback_info callback_info);
+        static napi_value GetState(napi_env env, napi_callback_info callback_info);
+        static napi_value Import(napi_env env, napi_callback_info callback_info);
         static napi_value IsTablePersistent(napi_env env, napi_callback_info callback_info);
+        static napi_value Merge(napi_env env, napi_callback_info callback_info);
         static napi_value OpenView(napi_env env, napi_callback_info callback_info);
 
         Database(napi_env env, MSIHANDLE handle);

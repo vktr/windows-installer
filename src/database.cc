@@ -29,6 +29,7 @@ napi_status Database::Init(napi_env env, napi_value exports)
 {
     napi_property_descriptor properties[] =
     {
+        { "applyTransform", nullptr, ApplyTransform, nullptr, nullptr, 0, napi_default, 0 },
         { "commit", nullptr, Commit, nullptr, nullptr, 0, napi_default, 0 },
         { "getPrimaryKeys", nullptr, GetPrimaryKeys, nullptr, nullptr, 0, napi_default, 0 },
         { "isTablePersistent", nullptr, IsTablePersistent, nullptr, nullptr, 0, napi_default, 0 },
@@ -115,6 +116,49 @@ napi_value Database::New(napi_env env, napi_callback_info callback_info)
     Database* db = new Database(env, ph);
     napi_wrap(env, _this, db, Database::Destructor, nullptr, &db->wrapper_);
     return _this;
+}
+
+napi_value Database::ApplyTransform(napi_env env, napi_callback_info callback_info)
+{
+    size_t argc = 2;
+    napi_value args[2];
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, &argc, args, &_this, nullptr);
+
+    Database* db;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&db));
+
+    std::string transform_file;
+    wi_napi_to_std_string(env, args[0], &transform_file);
+
+    int32_t error_conditions;
+    napi_get_value_int32(env, args[1], &error_conditions);
+
+    UINT res = MsiDatabaseApplyTransform(
+        db->handle_,
+        transform_file.c_str(),
+        error_conditions);
+
+    switch (res)
+    {
+    case ERROR_INVALID_HANDLE:
+        napi_throw_type_error(env, nullptr, "An invalid or inactive handle was supplied.");
+        break;
+
+    case ERROR_INVALID_PARAMETER:
+        napi_throw_type_error(env, nullptr, "An invalid parameter was passed to the function.");
+        break;
+
+    case ERROR_INSTALL_TRANSFORM_FAILURE:
+        napi_throw_type_error(env, nullptr, "The transform could not be applied.");
+        break;
+
+    case ERROR_OPEN_FAILED:
+        napi_throw_type_error(env, nullptr, "The transform storage file could not be opened.");
+        break;
+    }
+
+    return nullptr;
 }
 
 napi_value Database::Commit(napi_env env, napi_callback_info callback_info)
