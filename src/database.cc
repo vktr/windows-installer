@@ -32,6 +32,7 @@ napi_status Database::Init(napi_env env, napi_value exports)
         { "applyTransform", nullptr, ApplyTransform, nullptr, nullptr, 0, napi_default, 0 },
         { "commit", nullptr, Commit, nullptr, nullptr, 0, napi_default, 0 },
         { "export", nullptr, Export, nullptr, nullptr, 0, napi_default, 0 },
+        { "generateTransform", nullptr, GenerateTransform, nullptr, nullptr, 0, napi_default, 0 },
         { "getPrimaryKeys", nullptr, GetPrimaryKeys, nullptr, nullptr, 0, napi_default, 0 },
         { "isTablePersistent", nullptr, IsTablePersistent, nullptr, nullptr, 0, napi_default, 0 },
         { "openView", nullptr, OpenView, nullptr, nullptr, 0, napi_default, 0 },
@@ -236,6 +237,95 @@ napi_value Database::Export(napi_env env, napi_callback_info callback_info)
 
     return nullptr;
 }
+
+napi_value Database::GenerateTransform(napi_env env, napi_callback_info callback_info)
+{
+    size_t argc = 2;
+    napi_value args[2];
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, &argc, args, &_this, nullptr);
+
+    Database* db;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&db));
+
+    Database* db_reference;
+    napi_unwrap(env, args[0], reinterpret_cast<void**>(&db_reference));
+
+    if (argc == 1) // No transform file, returns true or false if the databases are equal or not
+    {
+        UINT res = MsiDatabaseGenerateTransform(
+            db->handle_,
+            db_reference->handle_,
+            NULL,
+            0, // This is a reserved argument and must be set to 0.
+            0); // This is a reserved argument and must be set to 0.
+
+        napi_value result;
+
+        switch (res)
+        {
+        case ERROR_NO_DATA:
+            napi_get_boolean(env, true, &result);
+            break;
+
+        case ERROR_CREATE_FAILED:
+            napi_throw_type_error(env, nullptr, "The storage for the transform file could not be created.");
+            return nullptr;
+
+        case ERROR_INSTALL_TRANSFORM_FAILURE:
+            napi_throw_type_error(env, nullptr, "The transform could not be generated.");
+            return nullptr;
+
+        case ERROR_INVALID_HANDLE:
+            napi_throw_type_error(env, nullptr, "An invalid or inactive handle was supplied.");
+            return nullptr;
+
+        case ERROR_INVALID_PARAMETER:
+            napi_throw_type_error(env, nullptr, "An invalid parameter was passed to the function.");
+            return nullptr;
+
+        // case NOERROR:
+        case ERROR_SUCCESS:
+            napi_get_boolean(env, true, &result);
+            break;
+        }
+
+        return result;
+    }
+
+    // Assume two args
+    std::string transform_file;
+    wi_napi_to_std_string(env, args[1], &transform_file);
+
+    UINT res = MsiDatabaseGenerateTransform(
+        db->handle_,
+        db_reference->handle_,
+        transform_file.c_str(),
+        0, // This is a reserved argument and must be set to 0.
+        0); // This is a reserved argument and must be set to 0.
+
+    switch (res)
+    {
+    case ERROR_CREATE_FAILED:
+        napi_throw_type_error(env, nullptr, "The storage for the transform file could not be created.");
+        return nullptr;
+
+    case ERROR_INSTALL_TRANSFORM_FAILURE:
+        napi_throw_type_error(env, nullptr, "The transform could not be generated.");
+        return nullptr;
+
+    case ERROR_INVALID_HANDLE:
+        napi_throw_type_error(env, nullptr, "An invalid or inactive handle was supplied.");
+        return nullptr;
+
+    case ERROR_INVALID_PARAMETER:
+        napi_throw_type_error(env, nullptr, "An invalid parameter was passed to the function.");
+        return nullptr;
+    }
+
+    return nullptr;
+}
+
 
 napi_value Database::IsTablePersistent(napi_env env, napi_callback_info callback_info)
 {
