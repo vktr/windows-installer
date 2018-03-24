@@ -34,6 +34,7 @@ napi_status Database::Init(napi_env env, napi_value exports)
         { "export", nullptr, Export, nullptr, nullptr, 0, napi_default, 0 },
         { "generateTransform", nullptr, GenerateTransform, nullptr, nullptr, 0, napi_default, 0 },
         { "getPrimaryKeys", nullptr, GetPrimaryKeys, nullptr, nullptr, 0, napi_default, 0 },
+        { "getState", nullptr, GetState, nullptr, nullptr, 0, napi_default, 0 },
         { "isTablePersistent", nullptr, IsTablePersistent, nullptr, nullptr, 0, napi_default, 0 },
         { "openView", nullptr, OpenView, nullptr, nullptr, 0, napi_default, 0 },
     };
@@ -326,7 +327,6 @@ napi_value Database::GenerateTransform(napi_env env, napi_callback_info callback
     return nullptr;
 }
 
-
 napi_value Database::IsTablePersistent(napi_env env, napi_callback_info callback_info)
 {
     size_t argc = 1;
@@ -411,6 +411,29 @@ napi_value Database::GetPrimaryKeys(napi_env env, napi_callback_info callback_in
     napi_new_instance(env, cons, ARRAYSIZE(argv), argv, &instance);
 
     return instance;
+}
+
+napi_value Database::GetState(napi_env env, napi_callback_info callback_info)
+{
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, 0, nullptr, &_this, nullptr);
+
+    Database* db;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&db));
+
+    MSIDBSTATE state = MsiGetDatabaseState(db->handle_);
+
+    switch (state)
+    {
+    case MSIDBSTATE_ERROR:
+        napi_throw_type_error(env, nullptr, "An invalid database handle was passed to the function.");
+        return nullptr;
+    }
+
+    napi_value result;
+    napi_create_int32(env, state, &result);
+
+    return result;
 }
 
 napi_value Database::OpenView(napi_env env, napi_callback_info callback_info)

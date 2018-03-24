@@ -34,6 +34,12 @@ napi_value Init(napi_env env, napi_value exports) {
     napi_value wi_MSITRANSFORM_ERROR_VIEWTRANSFORM;
     napi_create_int32(env, MSITRANSFORM_ERROR_VIEWTRANSFORM, &wi_MSITRANSFORM_ERROR_VIEWTRANSFORM);
 
+    napi_value wi_MSIDBSTATE_READ;
+    napi_create_int32(env, MSIDBSTATE_READ, &wi_MSIDBSTATE_READ);
+
+    napi_value wi_MSIDBSTATE_WRITE;
+    napi_create_int32(env, MSIDBSTATE_WRITE, &wi_MSIDBSTATE_WRITE);
+
     napi_property_descriptor methods[] =
     {
         { "MSIDBOPEN_READONLY", nullptr, nullptr, nullptr, nullptr, wi_MSIDBOPEN_READONLY, napi_default, nullptr },
@@ -46,8 +52,8 @@ napi_value Init(napi_env env, napi_value exports) {
         { "MSITRANSFORM_ERROR_CHANGECODEPAGE", nullptr, nullptr, nullptr, nullptr, wi_MSITRANSFORM_ERROR_CHANGECODEPAGE, napi_default, nullptr },
         { "MSITRANSFORM_ERROR_VIEWTRANSFORM", nullptr, nullptr, nullptr, nullptr, wi_MSITRANSFORM_ERROR_VIEWTRANSFORM, napi_default, nullptr },
 
-        { "MSIDBOPEN_READONLY", nullptr, nullptr, nullptr, nullptr, wi_MSIDBOPEN_READONLY, napi_default, nullptr },
-        { "MSIDBOPEN_READONLY", nullptr, nullptr, nullptr, nullptr, wi_MSIDBOPEN_READONLY, napi_default, nullptr },
+        { "MSIDBSTATE_READ", nullptr, nullptr, nullptr, nullptr, wi_MSIDBSTATE_READ, napi_default, nullptr },
+        { "MSIDBSTATE_WRITE", nullptr, nullptr, nullptr, nullptr, wi_MSIDBSTATE_WRITE, napi_default, nullptr },
     };
 
     napi_define_properties(env, exports, ARRAYSIZE(methods), methods);
