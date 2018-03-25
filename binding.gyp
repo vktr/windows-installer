@@ -6,6 +6,7 @@
             "sources":
             [
                 "./src/database.cc",
+                "./src/preview.cc",
                 "./src/record.cc",
                 "./src/summary-information.cc",
                 "./src/view.cc",

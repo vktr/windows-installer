@@ -1,6 +1,7 @@
 #include "database.h"
 
 #include "common.h"
+#include "preview.h"
 #include "record.h"
 #include "summary-information.h"
 #include "view.h"
@@ -32,6 +33,7 @@ napi_status Database::Init(napi_env env, napi_value exports)
     {
         { "applyTransform", nullptr, ApplyTransform, nullptr, nullptr, 0, napi_default, 0 },
         { "commit", nullptr, Commit, nullptr, nullptr, 0, napi_default, 0 },
+        { "enableUIPreview", nullptr, EnableUIPreview, nullptr, nullptr, 0, napi_default, 0 },
         { "export", nullptr, Export, nullptr, nullptr, 0, napi_default, 0 },
         { "generateTransform", nullptr, GenerateTransform, nullptr, nullptr, 0, napi_default, 0 },
         { "getPrimaryKeys", nullptr, GetPrimaryKeys, nullptr, nullptr, 0, napi_default, 0 },
@@ -193,6 +195,45 @@ napi_value Database::Commit(napi_env env, napi_callback_info callback_info)
     }
 
     return nullptr;
+}
+
+napi_value Database::EnableUIPreview(napi_env env, napi_callback_info callback_info)
+{
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, 0, nullptr, &_this, nullptr);
+
+    Database* db;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&db));
+
+    MSIHANDLE ph;
+    UINT res = MsiEnableUIPreview(db->handle_, &ph);
+
+    switch (res)
+    {
+    case ERROR_INVALID_HANDLE:
+        napi_throw_type_error(env, nullptr, "An invalid or inactive handle was supplied.");
+        return nullptr;
+
+    case ERROR_INVALID_PARAMETER:
+        napi_throw_type_error(env, nullptr, "Bad parameter.");
+        return nullptr;
+
+    case ERROR_OUTOFMEMORY:
+        napi_throw_type_error(env, nullptr, "Out of memory.");
+        return nullptr;
+    }
+
+    napi_value external;
+    napi_create_external(env, &ph, nullptr, nullptr, &external);
+
+    napi_value cons;
+    napi_get_reference_value(env, Preview::constructor, &cons);
+
+    napi_value argv[] = { external };
+    napi_value instance;
+    napi_new_instance(env, cons, ARRAYSIZE(argv), argv, &instance);
+
+    return instance;
 }
 
 napi_value Database::Export(napi_env env, napi_callback_info callback_info)

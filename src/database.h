@@ -23,6 +23,7 @@ namespace wi
         // Class functions
         static napi_value ApplyTransform(napi_env env, napi_callback_info callback_info);
         static napi_value Commit(napi_env env, napi_callback_info callback_info);
+        static napi_value EnableUIPreview(napi_env env, napi_callback_info callback_info);
         static napi_value Export(napi_env env, napi_callback_info callback_info);
         static napi_value GenerateTransform(napi_env env, napi_callback_info callback_info);
         static napi_value GetPrimaryKeys(napi_env env, napi_callback_info callback_info);

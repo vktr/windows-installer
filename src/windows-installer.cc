@@ -1,12 +1,14 @@
 #include <node_api.h>
 
 #include "database.h"
+#include "preview.h"
 #include "record.h"
 #include "summary-information.h"
 #include "view.h"
 
 napi_value Init(napi_env env, napi_value exports) {
     wi::Database::Init(env, exports);
+    wi::Preview::Init(env, exports);
     wi::Record::Init(env, exports);
     wi::SummaryInformation::Init(env, exports);
     wi::View::Init(env, exports);
