@@ -27,6 +27,7 @@ namespace wi
         static napi_value GenerateTransform(napi_env env, napi_callback_info callback_info);
         static napi_value GetPrimaryKeys(napi_env env, napi_callback_info callback_info);
         static napi_value GetState(napi_env env, napi_callback_info callback_info);
+        static napi_value GetSummaryInformation(napi_env env, napi_callback_info callback_info);
         static napi_value Import(napi_env env, napi_callback_info callback_info);
         static napi_value IsTablePersistent(napi_env env, napi_callback_info callback_info);
         static napi_value Merge(napi_env env, napi_callback_info callback_info);

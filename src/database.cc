@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "record.h"
+#include "summary-information.h"
 #include "view.h"
 
 using wi::Database;
@@ -35,6 +36,7 @@ napi_status Database::Init(napi_env env, napi_value exports)
         { "generateTransform", nullptr, GenerateTransform, nullptr, nullptr, 0, napi_default, 0 },
         { "getPrimaryKeys", nullptr, GetPrimaryKeys, nullptr, nullptr, 0, napi_default, 0 },
         { "getState", nullptr, GetState, nullptr, nullptr, 0, napi_default, 0 },
+        { "getSummaryInformation", nullptr, GetSummaryInformation, nullptr, nullptr, 0, napi_default, 0 },
         { "import", nullptr, Import, nullptr, nullptr, 0, napi_default, 0 },
         { "isTablePersistent", nullptr, IsTablePersistent, nullptr, nullptr, 0, napi_default, 0 },
         { "openView", nullptr, OpenView, nullptr, nullptr, 0, napi_default, 0 },
@@ -478,6 +480,55 @@ napi_value Database::GetState(napi_env env, napi_callback_info callback_info)
     napi_create_int32(env, state, &result);
 
     return result;
+}
+
+napi_value Database::GetSummaryInformation(napi_env env, napi_callback_info callback_info)
+{
+    size_t argc = 1;
+    napi_value args[1];
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, &argc, args, &_this, nullptr);
+
+    Database* db;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&db));
+
+    int32_t update_count;
+    napi_get_value_int32(env, args[0], &update_count);
+
+    MSIHANDLE ph;
+
+    UINT res = MsiGetSummaryInformation(
+        db->handle_,
+        0,
+        static_cast<UINT>(update_count),
+        &ph);
+
+    switch (res)
+    {
+    case ERROR_INSTALL_PACKAGE_INVALID:
+        napi_throw_type_error(env, nullptr, "The installation package is invalid.");
+        return nullptr;
+
+    case ERROR_INVALID_HANDLE:
+        napi_throw_type_error(env, nullptr, "An invalid or inactive handle was supplied.");
+        return nullptr;
+
+    case ERROR_INVALID_PARAMETER:
+        napi_throw_type_error(env, nullptr, "An invalid parameter was passed to the function.");
+        return nullptr;
+    }
+
+    napi_value external;
+    napi_create_external(env, &ph, nullptr, nullptr, &external);
+
+    napi_value cons;
+    napi_get_reference_value(env, SummaryInformation::constructor, &cons);
+
+    napi_value argv[] = { external };
+    napi_value instance;
+    napi_new_instance(env, cons, ARRAYSIZE(argv), argv, &instance);
+
+    return instance;
 }
 
 napi_value Database::Merge(napi_env env, napi_callback_info callback_info)

@@ -1,0 +1,22 @@
+const wi = require('../');
+const summaryInfo = new wi.SummaryInformation(process.argv[2], 0);
+
+console.log('Property count:', summaryInfo.getPropertyCount());
+console.log('---');
+console.log('Codepage:', summaryInfo.getProperty(wi.PID_CODEPAGE));
+console.log('Title:', summaryInfo.getProperty(wi.PID_TITLE));
+console.log('Subject:', summaryInfo.getProperty(wi.PID_SUBJECT));
+console.log('Author:', summaryInfo.getProperty(wi.PID_AUTHOR));
+console.log('Keywords:', summaryInfo.getProperty(wi.PID_KEYWORDS));
+console.log('Comments:', summaryInfo.getProperty(wi.PID_COMMENTS));
+console.log('Template:', summaryInfo.getProperty(wi.PID_TEMPLATE));
+console.log('Last Saved By:', summaryInfo.getProperty(wi.PID_LASTAUTHOR));
+console.log('Revision Number:', summaryInfo.getProperty(wi.PID_REVNUMBER));
+console.log('Last Printed:', summaryInfo.getProperty(wi.PID_LASTPRINTED));
+console.log('Create Time/Date:', summaryInfo.getProperty(wi.PID_CREATE_DTM));
+console.log('Last Save Time/Date:', summaryInfo.getProperty(wi.PID_LASTSAVE_DTM));
+console.log('Page Count:', summaryInfo.getProperty(wi.PID_PAGECOUNT));
+console.log('Word Count:', summaryInfo.getProperty(wi.PID_WORDCOUNT));
+console.log('Character Count:', summaryInfo.getProperty(wi.PID_CHARCOUNT));
+console.log('Creating Application:', summaryInfo.getProperty(wi.PID_APPNAME));
+console.log('Security:', summaryInfo.getProperty(wi.PID_SECURITY));

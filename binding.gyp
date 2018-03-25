@@ -7,6 +7,7 @@
             [
                 "./src/database.cc",
                 "./src/record.cc",
+                "./src/summary-information.cc",
                 "./src/view.cc",
                 "./src/windows-installer.cc"
             ],
