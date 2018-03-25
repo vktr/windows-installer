@@ -37,6 +37,7 @@ napi_status Record::Init(napi_env env, napi_value exports)
         { "readStream", nullptr, ReadStream, nullptr, nullptr, 0, napi_default, 0 },
         { "setInteger", nullptr, SetInteger, nullptr, nullptr, 0, napi_default, 0 },
         { "setStream", nullptr, SetStream, nullptr, nullptr, 0, napi_default, 0 },
+        { "setString", nullptr, SetString, nullptr, nullptr, 0, napi_default, 0 },
     };
 
     napi_value cons;
@@ -324,6 +325,41 @@ napi_value Record::SetStream(napi_env env, napi_callback_info callback_info)
         napi_throw_type_error(env, nullptr, "The function failed.");
         break;
 
+    case ERROR_INVALID_HANDLE:
+        napi_throw_type_error(env, nullptr, "An invalid or inactive handle was supplied.");
+        break;
+
+    case ERROR_INVALID_PARAMETER:
+        napi_throw_type_error(env, nullptr, "An invalid parameter was passed to the function.");
+        break;
+    }
+
+    return nullptr;
+}
+
+napi_value Record::SetString(napi_env env, napi_callback_info callback_info)
+{
+    size_t argc = 2;
+    napi_value args[2];
+    napi_value _this;
+    napi_get_cb_info(env, callback_info, &argc, args, &_this, nullptr);
+
+    Record* rec;
+    napi_unwrap(env, _this, reinterpret_cast<void**>(&rec));
+
+    int32_t field;
+    napi_get_value_int32(env, args[0], &field);
+
+    std::string value;
+    wi_napi_to_std_string(env, args[1], &value);
+
+    UINT res = MsiRecordSetString(
+        rec->handle_,
+        static_cast<UINT>(field),
+        value.c_str());
+
+    switch (res)
+    {
     case ERROR_INVALID_HANDLE:
         napi_throw_type_error(env, nullptr, "An invalid or inactive handle was supplied.");
         break;
