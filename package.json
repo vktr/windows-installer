@@ -2,11 +2,9 @@
   "name": "windows-installer",
   "version": "0.2.0",
   "description": "Node.js bindings for the Windows Installer API.",
-  "main": "build/Release/windows_installer.node",
+  "main": "build/Release/windows-installer.node",
   "scripts": {
-    "build": "node-gyp build",
-    "clean": "node-gyp clean",
-    "configure": "node-gyp configure"
+    "install": "cmake-js -G \"Visual Studio 16 2019\" compile"
   },
   "repository": "https://github.com/vktr/windows-installer.git",
   "keywords": [
@@ -22,6 +20,6 @@
   },
   "homepage": "https://github.com/vktr/windows-installer#readme",
   "dependencies": {
-    "node-gyp": "^3.6.2"
+    "cmake-js": "^5.2.0"
   }
 }
